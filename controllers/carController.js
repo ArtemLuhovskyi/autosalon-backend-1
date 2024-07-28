@@ -4,39 +4,50 @@ const Users = require('../db/models/Users.js');
 const dataCars = require('../data.js');
 const Team = require('../db/models/Team.js');
 const carService = require('../services/carService');
+const teamService = require('../services/teamService');
 
 const CarsService = new carService();
+const TeamService = new teamService();
 
 exports.getData = (req, res) => {
     res.send({ data: dataCars });
 };
 
 exports.getTeam = async (req, res) => {
-    // await Team.create({
-    //   img: '/img/01.png',
-    //       title: "Артем Луговський",
-    //       description: "Керівник фірми"
-    // });
-    // await Team.create({
-    //   img: '/img/02.png',
-    //       title: "Марія Михайлівна",
-    //       description: "Менеджер"
-    // });
-    // await Team.create({
-    //   img: '/img/03.png',
-    //   title: "Вікторія Вікторівна",
-    //   description: "Менеджер"
-    // });
-    // await Team.create({
-    //   img: '/img/04.png',
-    //   title: "Вадим Вадимович",
-    //   description: "Фахівець із запчастин"
-    // });
-
-    const dataTeam = await Team.findAll();
+    const dataTeam = await TeamService.getAllTeams();
     console.log(dataTeam);
     res.send({ data: dataTeam });
 };
+
+exports.addTeam = async (req, res) => {
+    const { img, title, description } = req.body;
+    const newTeamObj = {
+      img,
+      title,
+      description,
+    };
+    await TeamService.createTeam(newTeamObj);
+    res.send({ message: 'Team added' });
+};
+
+exports.deleteTeam = async (req, res) => {
+    const { id } = req.body;
+    await TeamService.deleteTeam(id);
+    res.send({ message: 'Team deleted' });
+};
+
+exports.updateTeam = async (req, res) => {
+    const { id, img,title, description } = req.body;
+    const newTeamObj = {
+      id,
+      img,
+      title,
+      description,
+    };
+    await TeamService.updateTeam(id, newTeamObj);
+    res.send({ message: 'Team updated' });
+};
+
 
 exports.getCars = async (req, res) => {
     const dataCars = await CarsService.getAllCars();
@@ -66,7 +77,6 @@ exports.deleteCar = async (req, res) => {
 
 exports.updateCar = async (req, res) => {
     const { id, img,title, description, price } = req.body;
-    console.log('body ', req.body);
     const newCarObj = {
       id,
       img,

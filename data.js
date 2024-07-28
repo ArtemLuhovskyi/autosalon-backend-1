@@ -2,7 +2,7 @@
 //     id: number;
 //     img: string;
 //     title: string;
-//     decription: string;
+//     description: string;
 //     price: number[];
 //     additional_info?: {
 //         hero_image: string;
@@ -21,7 +21,7 @@ const dataCars = [
         id: 1,
         img: '/img/BMW/main.jpg',
         title: "BMW 7 Series",
-        decription: "Розкішний і комфортний седан для вимогливих водіїв.",
+        description: "Розкішний і комфортний седан для вимогливих водіїв.",
         price: [68493, 104110],
         additional_info: {
             hero_image:'/img/BMW/bg.jpg',
@@ -171,7 +171,7 @@ const dataCars = [
         id: 2,
         img: '/img/Bugatti/main.jpg',
         title: "Bugatti Veyron",
-        decription: "Неймовірна швидкість та розкіш у кожній деталі.",
+        description: "Неймовірна швидкість та розкіш у кожній деталі.",
         price: [1232000],
         additional_info: {
             hero_image:'/img/Bugatti/bg.jpg',
@@ -302,7 +302,7 @@ const dataCars = [
         id: 3,
         img: '/img/Lamborghini/main.jpg',
         title: "Lamborghini Huracan LP610-4",
-        decription: "Спортивний автомобіль з неймовірною динамікою та дизайном.",
+        description: "Спортивний автомобіль з неймовірною динамікою та дизайном.",
         price: [219178],
         additional_info: {
             hero_image:'/img/Lamborghini/bg.jpg',
@@ -430,7 +430,7 @@ const dataCars = [
         id: 4,
         img: '/img/Land_Rover/main.jpg',
         title: "Land Rover Defender 90",
-        decription: "Надійний та потужний позашляховик для будь-яких доріг.",
+        description: "Надійний та потужний позашляховик для будь-яких доріг.",
         price: [87671, 123288],
         additional_info: {
             hero_image:'/img/Land_Rover/bg.jpg',
@@ -558,7 +558,7 @@ const dataCars = [
         id: 5,
         img: '/img/PORSCHE/main.jpg',
         title: "Porsche 911 Carrera",
-        decription: "Ікона стилю та продуктивності серед спортивних авто.",
+        description: "Ікона стилю та продуктивності серед спортивних авто.",
         price: [150685, 191781],
         additional_info: {
             hero_image:'/img/PORSCHE/bg.jpg',
@@ -684,7 +684,7 @@ const dataCars = [
         id: 6,
         img: '/img/Tesla/main.jpg',
         title: "Tesla Model X P100D",
-        decription: "Електричний кросовер з футуристичним дизайном та високими технологіями.",
+        description: "Електричний кросовер з футуристичним дизайном та високими технологіями.",
         price: [104110, 142466],
         additional_info: {
             hero_image:'/img/Tesla/bg.jpg',

@@ -20,7 +20,7 @@ Team.init(
             type: DataTypes.STRING,
             allowNull: true
         },
-        decription: {
+        description: {
             type: DataTypes.STRING,
             allowNull: true
         },
