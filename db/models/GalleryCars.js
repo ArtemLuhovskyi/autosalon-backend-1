@@ -2,9 +2,9 @@ const { Model, DataTypes, literal } = require("sequelize");
 const SequelizeConnector = require("../connectors/sequelizeConnector");
 const sequelize = SequelizeConnector.getInstance().sequelizeInstance();
 
-class Cars extends Model { }
+class GalleryCars extends Model { }
 
-Cars.init(
+GalleryCars.init(
     {
         id: {
             type: DataTypes.INTEGER.UNSIGNED,
@@ -12,22 +12,22 @@ Cars.init(
             primaryKey: true,
             autoIncrement: true
         },
-        title: {
+        img_url: {
             type: DataTypes.STRING,
             allowNull: true
         },
-        description: {
-            type: DataTypes.STRING,
+        img_type: {
+            type: DataTypes.ENUM('main', 'hero', 'gallery', 'description'),
             allowNull: true
         },
-        price: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
-        additional_info: {
-            type: DataTypes.JSON,
-            allowNull: true
-        },
+        car_id: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            references: {
+              model: 'cars',
+              key: 'id'
+            },
+            allowNull: false
+          },
         createdAt: {
             type: 'TIMESTAMP',
             defaultValue: literal('CURRENT_TIMESTAMP'),
@@ -40,18 +40,18 @@ Cars.init(
         },
     },
     {
-        tableName: "cars",
+        tableName: "galleryCars",
         sequelize,
     }
 );
 
 
-Cars.sync()
+GalleryCars.sync()
     .then(() => {
-        console.log('Table cars created successfully');
+        console.log('Table galleryCars created successfully');
     })
     .catch(err => {
         console.error('Error creating table:', err);
     });
 
-module.exports = Cars;
+module.exports = GalleryCars;

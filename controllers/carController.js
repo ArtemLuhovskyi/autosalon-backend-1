@@ -5,6 +5,9 @@ const dataCars = require('../data.js');
 const Team = require('../db/models/Team.js');
 const carService = require('../services/carService');
 const teamService = require('../services/teamService');
+const models = require('../db/models');
+const path = require('path');
+const fs = require('fs');
 
 const CarsService = new carService();
 const TeamService = new teamService();
@@ -55,37 +58,87 @@ exports.getCars = async (req, res) => {
 };
 
 exports.addCar = async (req, res) => {
-    console.log('body ', req.body);
-    const {img, title, description, price } = req.body;
+  try {
+    const { title, description, price } = req.body;
+    const newCarObj = { title, description, price };
+    const newCar = await CarsService.createCar(newCarObj);
 
-    const newCarObj = {
-      img,
-        title,
-        description,
-        price,
-    };
-    await CarsService.createCar(newCarObj);
+    if (req.file) {
+      const tempPath = req.file.path;
+      const carId = newCar.id.toString();
+      const imgDir = path.join(__dirname, '../public/img', carId);
+      const imgPath = path.join(imgDir, req.file.originalname);
 
-    res.send({ message: 'Car added' });
-};
+      fs.mkdirSync(imgDir, { recursive: true });
+      fs.renameSync(tempPath, imgPath);
 
-exports.deleteCar = async (req, res) => {
-    const { id } = req.body;
-    await CarsService.deleteCar(id);
-    res.send({ message: 'Car deleted' });
+      await models.GalleryCars.create({
+        img_url: path.join('img', carId, req.file.originalname),
+        img_type: 'main',
+        car_id: newCar.id
+      });
+
+      console.log('Image saved at:', imgPath);
+    }
+
+    res.status(201).send({ message: 'Car added', car: newCar });
+  } catch (error) {
+    console.error('Error adding car:', error);
+    res.status(500).send({ message: 'Error adding car', error });
+  }
 };
 
 exports.updateCar = async (req, res) => {
-    const { id, img,title, description, price } = req.body;
-    const newCarObj = {
-      id,
-      img,
-        title,
-        description,
-        price,
-    };
-    await CarsService.updateCar(id, newCarObj);
-    res.send({ message: 'Car updated' });
+  try {
+    const { id, title, description, price } = req.body;
+    const car = await CarsService.getCarById(id);
+
+    if (!car) {
+      return res.status(404).json({ success: false, message: 'Car not found' });
+    }
+
+    car.title = title;
+    car.description = description;
+    car.price = price;
+
+    if (req.file) {
+      const tempPath = req.file.path;
+      const carId = car.id.toString();
+      const imgDir = path.join(__dirname, '../public/img', carId);
+      const imgPath = path.join(imgDir, req.file.originalname);
+
+      fs.mkdirSync(imgDir, { recursive: true });
+      fs.renameSync(tempPath, imgPath);
+
+      await models.GalleryCars.update({
+        img_url: path.join('img', carId, req.file.originalname),
+        img_type: 'main',
+        car_id: car.id
+      }, {
+        where: {
+          car_id: car.id
+        }
+      });
+
+      console.log('Image saved at:', imgPath);
+    }
+
+    await car.save();
+    res.json({ success: true, data: car });
+  } catch (error) {
+    console.error('Error updating car:', error);
+    res.status(500).send({ message: 'Error updating car', error });
+  }
+};
+
+exports.deleteCar = async (req, res) => {
+  try {
+      const { id } = req.body;
+      await CarsService.deleteCar(id);
+      res.send({ message: 'Car deleted' });
+  } catch (error) {
+      res.status(500).send({ message: 'Error deleting car', error });
+  }
 };
 
 exports.getCarById = async (req, res) => {
