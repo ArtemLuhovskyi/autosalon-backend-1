@@ -21,9 +21,9 @@ const upload = multer({ storage: storage });
 router.get('/getData', carController.getData);
 
 router.get('/getTeam', carController.getTeam);
-router.post('/addTeam', carController.addTeam);
+router.post('/addTeam', upload.single('file'), carController.addTeam);
 router.post('/deleteTeam', carController.deleteTeam);
-router.put('/updateTeam', carController.updateTeam);
+router.put('/updateTeam', upload.single('file'), carController.updateTeam);
 
 router.get('/getCars', carController.getCars);
 router.post('/addCar',  upload.single('file'), carController.addCar);

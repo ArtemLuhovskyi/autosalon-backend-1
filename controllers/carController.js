@@ -23,32 +23,70 @@ exports.getTeam = async (req, res) => {
 };
 
 exports.addTeam = async (req, res) => {
-    const { img, title, description } = req.body;
-    const newTeamObj = {
-      img,
-      title,
-      description,
-    };
-    await TeamService.createTeam(newTeamObj);
-    res.send({ message: 'Team added' });
+  try {
+    const { title, description } = req.body;
+    const newTeamObj = { title, description };
+    const newTeam = await TeamService.createTeam(newTeamObj);
+
+    if (req.file) {
+      const teamId = newTeam.id.toString();
+      const imgDir = path.join(__dirname, '../public/images/team', teamId);
+      const imgPath = path.join(imgDir, req.file.originalname);
+
+      fs.mkdirSync(imgDir, { recursive: true });
+      fs.renameSync(req.file.path, imgPath);
+
+      newTeam.img = `images/team/${teamId}/${req.file.originalname}`;
+      await newTeam.save();
+    }
+
+    res.status(201).send({ message: 'Team added', team: newTeam });
+  } catch (error) {
+    res.status(500).send({ message: 'Error adding team', error });
+  }
 };
 
 exports.deleteTeam = async (req, res) => {
+  try {
     const { id } = req.body;
     await TeamService.deleteTeam(id);
+    const teamImagePath = path.join(__dirname, '../public/images/team', id.toString());
+
+    fs.rmdirSync(teamImagePath, { recursive: true });
     res.send({ message: 'Team deleted' });
+} catch (error) {
+    res.status(500).send({ message: 'Error deleting team', error });
+}
 };
 
 exports.updateTeam = async (req, res) => {
-    const { id, img,title, description } = req.body;
-    const newTeamObj = {
-      id,
-      img,
-      title,
-      description,
-    };
-    await TeamService.updateTeam(id, newTeamObj);
-    res.send({ message: 'Team updated' });
+  try {
+    const { id, title, description } = req.body;
+    const team = await TeamService.getTeamById(id);
+
+    if (!team) {
+      return res.status(404).json({ success: false, message: 'Team not found' });
+    }
+
+    team.title = title;
+    team.description = description;
+
+    if (req.file) {
+      const teamId = team.id.toString();
+      const imgDir = path.join(__dirname, '../public/images/team', teamId);
+      const imgPath = path.join(imgDir, req.file.originalname);
+
+      fs.mkdirSync(imgDir, { recursive: true });
+      fs.renameSync(req.file.path, imgPath);
+
+      team.img = `images/team/${teamId}/${req.file.originalname}`;
+    }
+
+    await team.save();
+    res.json({ success: true, data: team });
+  } catch (error) {
+    res.status(500).send({ message: 'Error updating team', error });
+  }
 };
 
 
@@ -66,14 +104,14 @@ exports.addCar = async (req, res) => {
     if (req.file) {
       const tempPath = req.file.path;
       const carId = newCar.id.toString();
-      const imgDir = path.join(__dirname, '../public/img', carId);
+      const imgDir = path.join(__dirname, '../public/images/cars', carId);
       const imgPath = path.join(imgDir, req.file.originalname);
 
       fs.mkdirSync(imgDir, { recursive: true });
       fs.renameSync(tempPath, imgPath);
 
       await models.GalleryCars.create({
-        img_url: path.join('img', carId, req.file.originalname),
+        img_url: path.join('images/cars', carId, req.file.originalname),
         img_type: 'main',
         car_id: newCar.id
       });
@@ -104,14 +142,14 @@ exports.updateCar = async (req, res) => {
     if (req.file) {
       const tempPath = req.file.path;
       const carId = car.id.toString();
-      const imgDir = path.join(__dirname, '../public/img', carId);
+      const imgDir = path.join(__dirname, '../public/images/cars', carId);
       const imgPath = path.join(imgDir, req.file.originalname);
 
       fs.mkdirSync(imgDir, { recursive: true });
       fs.renameSync(tempPath, imgPath);
 
       await models.GalleryCars.update({
-        img_url: path.join('img', carId, req.file.originalname),
+        img_url: path.join('images/cars', carId, req.file.originalname),
         img_type: 'main',
         car_id: car.id
       }, {
@@ -135,6 +173,9 @@ exports.deleteCar = async (req, res) => {
   try {
       const { id } = req.body;
       await CarsService.deleteCar(id);
+      const carImagePath = path.join(__dirname, '../public/images/cars', id.toString());
+
+      fs.rmdirSync(carImagePath, { recursive: true });
       res.send({ message: 'Car deleted' });
   } catch (error) {
       res.status(500).send({ message: 'Error deleting car', error });

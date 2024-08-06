@@ -7,6 +7,9 @@ class TeamService {
     async getAllTeams() {
         return await this.teamModel.findAll();
     }
+    async getTeamById(id) {
+        return await this.teamModel.findByPk(id);
+    }
     async createTeam(team) {
         return await this.teamModel.create(team);
     }
