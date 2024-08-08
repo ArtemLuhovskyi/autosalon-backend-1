@@ -21,7 +21,20 @@ class CarService {
 
     }
     async getCarById(id) {
-        return await this.carModel.findByPk(id);
+        const car = await this.carModel.findOne({
+            where: {
+                id: id
+            },
+            include: [
+                {
+                    model: models.GalleryCars,
+                    as: 'images',
+
+                }
+            ]  
+        });
+        console.log('cars: ', car);
+        return car;
     }
     async createCar(car) {
         return await this.carModel.create(car);
