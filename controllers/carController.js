@@ -97,8 +97,8 @@ exports.getCars = async (req, res) => {
 
 exports.addCar = async (req, res) => {
   try {
-    const { title, description, price } = req.body;
-    const newCarObj = { title, description, price };
+    const { title, description, price, blocks } = req.body;
+    const newCarObj = { title, description, price, additional_info: blocks };
     const newCar = await CarsService.createCar(newCarObj);
 
     if (req.file) {
@@ -128,20 +128,20 @@ exports.addCar = async (req, res) => {
 
 exports.updateCar = async (req, res) => {
   try {
-    const { id, title, description, price } = req.body;
+    const { id, title, description, price, blocks } = req.body;
     const car = await CarsService.getCarById(id);
 
     if (!car) {
       return res.status(404).json({ success: false, message: 'Car not found' });
     }
-
+    const carId = car.id.toString();
     car.title = title;
     car.description = description;
     car.price = price;
-
+    car.additional_info = blocks;
+    
     if (req.file) {
       const tempPath = req.file.path;
-      const carId = car.id.toString();
       const imgDir = path.join(__dirname, '../public/images/cars', carId);
       const imgPath = path.join(imgDir, req.file.originalname);
 
@@ -161,6 +161,32 @@ exports.updateCar = async (req, res) => {
       console.log('Image saved at:', imgPath);
     }
 
+    console.log('files ', req.files);
+
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const tempPath = file.path;
+        const imgDir = path.join(__dirname, '../public/images/cars', carId);
+        const imgPath = path.join(imgDir, file.originalname);
+
+        fs.mkdirSync(imgDir, { recursive: true });
+        fs.renameSync(tempPath, imgPath);
+
+        await models.GalleryCars.update({
+        img_url: path.join('images/cars', carId, file.originalname),
+        img_type: 'gallery',
+        car_id: car.id
+        }, {
+        where: {
+          car_id: car.id
+        }
+        });
+
+      console.log('ImageGallery saved at:', imgPath);
+      }
+    }
+
+    // await CarsService.updateCar(id, car);
     await car.save();
     res.json({ success: true, data: car });
   } catch (error) {

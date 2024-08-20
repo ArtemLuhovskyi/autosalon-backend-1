@@ -33,7 +33,11 @@ class CarService {
                 }
             ]  
         });
-        console.log('cars: ', car);
+        if(car.additional_info) {
+            car.additional_info = JSON.parse(car.additional_info);
+        }
+        
+        console.log('car: ', car);
         return car;
     }
     async createCar(car) {
@@ -60,6 +64,16 @@ class CarService {
             }
         });
     }
-}
 
+    // async getAllAdditionInfoCars() {
+    //     const additionInfoCars = await this.carModel.findAll
+    //     ({
+    //         where: {
+    //             id: id
+    //         },
+
+    //     })
+    //     return additionInfoCars;
+    // }
+}
 module.exports = CarService;
