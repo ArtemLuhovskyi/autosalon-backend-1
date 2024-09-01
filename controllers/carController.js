@@ -8,6 +8,7 @@ const teamService = require('../services/teamService');
 const models = require('../db/models');
 const path = require('path');
 const fs = require('fs');
+const { Op } = require('sequelize');
 
 const CarsService = new carService();
 const TeamService = new teamService();
@@ -97,26 +98,67 @@ exports.getCars = async (req, res) => {
 
 exports.addCar = async (req, res) => {
   try {
-    const { title, description, price, blocks } = req.body;
-    const newCarObj = { title, description, price, additional_info: blocks };
+    const { title, description, price, blocks, descriptionBlocks } = req.body;
+    let {instruction} = req.body;
+
+    if (instruction) {
+      instruction = JSON.parse(instruction);
+    }
+
+    const newCarObj = { title, description, price, additional_info: blocks, description_info: descriptionBlocks };
     const newCar = await CarsService.createCar(newCarObj);
+    const carId = newCar.id.toString();
+    
+      // await models.GalleryCars.create({
+      //   img_url: path.join('images/cars', carId, req.file.originalname),
+      //   img_type: 'main',
+      //   car_id: newCar.id
+      // });
 
-    if (req.file) {
-      const tempPath = req.file.path;
-      const carId = newCar.id.toString();
-      const imgDir = path.join(__dirname, '../public/images/cars', carId);
-      const imgPath = path.join(imgDir, req.file.originalname);
+    if (req.files && req.files.length > 0) {
+      
+      for (const file of req.files) {
+        const tempPath = file.path;
+        const imgDir = path.join(__dirname, '../public/images/cars', carId);
+        const imgPath = path.join(imgDir, file.originalname);
 
-      fs.mkdirSync(imgDir, { recursive: true });
-      fs.renameSync(tempPath, imgPath);
+        fs.mkdirSync(imgDir, { recursive: true });
+        fs.renameSync(tempPath, imgPath);
 
-      await models.GalleryCars.create({
-        img_url: path.join('images/cars', carId, req.file.originalname),
-        img_type: 'main',
-        car_id: newCar.id
-      });
+        const instructionNew = instruction.find((inst) => inst.fileName === file.originalname);
+        if (instructionNew) {
+          if (instructionNew.imgType === "main") {
+            await models.GalleryCars.create({
+              img_url: path.join('images/cars', carId, file.originalname),
+              img_type: 'main',
+              car_id: newCar.id
+            });
+          }
+          if (instructionNew.imgType === "hero") {
+            await models.GalleryCars.create({
+              img_url: path.join('images/cars', carId, file.originalname),
+              img_type: 'hero',
+              car_id: newCar.id
+            });
+          }
+          if (instructionNew.imgType === "gallery") {
+            await models.GalleryCars.create({
+              img_url: path.join('images/cars', carId, file.originalname),
+              img_type: 'gallery',
+              car_id: newCar.id
+            });
+          }
+          if (instructionNew.imgType === 'description') {
+            await models.GalleryCars.create({
+              img_url: path.join('images/cars', carId, file.originalname),
+              img_type: 'description',
+              car_id: newCar.id
+            });
+          }
+        }
 
-      console.log('Image saved at:', imgPath);
+      console.log('ImageGallery saved at:', imgPath);
+      }
     }
 
     res.status(201).send({ message: 'Car added', car: newCar });
@@ -128,8 +170,20 @@ exports.addCar = async (req, res) => {
 
 exports.updateCar = async (req, res) => {
   try {
-    const { id, title, description, price, blocks } = req.body;
+    const { id, title, description, price, blocks, descriptionBlocks } = req.body;
+    let {instruction, deleteImages} = req.body;
     const car = await CarsService.getCarById(id);
+
+    if (instruction) {
+      instruction = JSON.parse(instruction);
+    }
+
+    if (deleteImages) {
+      deleteImages = JSON.parse(deleteImages);
+    }
+
+    console.log('instruction:', instruction);
+    console.log('deleteImages:', deleteImages);
 
     if (!car) {
       return res.status(404).json({ success: false, message: 'Car not found' });
@@ -139,31 +193,28 @@ exports.updateCar = async (req, res) => {
     car.description = description;
     car.price = price;
     car.additional_info = blocks;
+    car.description_info = descriptionBlocks;
     
-    if (req.file) {
-      const tempPath = req.file.path;
-      const imgDir = path.join(__dirname, '../public/images/cars', carId);
-      const imgPath = path.join(imgDir, req.file.originalname);
-
-      fs.mkdirSync(imgDir, { recursive: true });
-      fs.renameSync(tempPath, imgPath);
-
-      await models.GalleryCars.update({
-        img_url: path.join('images/cars', carId, req.file.originalname),
-        img_type: 'main',
-        car_id: car.id
-      }, {
+    await models.GalleryCars.destroy(
+      {
         where: {
-          car_id: car.id
+          id: {
+            [Op.in]: deleteImages
+          }
         }
       });
 
-      console.log('Image saved at:', imgPath);
-    }
-
-    console.log('files ', req.files);
-
     if (req.files && req.files.length > 0) {
+
+      if (deleteImages) {
+        // for (const img of deleteImages) {
+        //   const imgPath = path.join(__dirname, '../public/images/cars', carId, img);
+        //   fs.unlinkSync(imgPath);
+        // }
+
+      }
+
+      console.log('req.files:', req.files);
       for (const file of req.files) {
         const tempPath = file.path;
         const imgDir = path.join(__dirname, '../public/images/cars', carId);
@@ -172,16 +223,38 @@ exports.updateCar = async (req, res) => {
         fs.mkdirSync(imgDir, { recursive: true });
         fs.renameSync(tempPath, imgPath);
 
-        await models.GalleryCars.update({
-        img_url: path.join('images/cars', carId, file.originalname),
-        img_type: 'gallery',
-        car_id: car.id
-        }, {
-        where: {
-          car_id: car.id
+        const instructionNew = instruction.find((inst) => inst.fileName === file.originalname);
+        if (instructionNew) {
+          if (instructionNew.imgType === "main") {
+            await models.GalleryCars.create({
+              img_url: path.join('images/cars', carId, file.originalname),
+              img_type: 'main',
+              car_id: car.id
+            });
+          }
+          if (instructionNew.imgType === "hero") {
+            await models.GalleryCars.create({
+              img_url: path.join('images/cars', carId, file.originalname),
+              img_type: 'hero',
+              car_id: car.id
+            });
+          }
+          if (instructionNew.imgType === "gallery") {
+            await models.GalleryCars.create({
+              img_url: path.join('images/cars', carId, file.originalname),
+              img_type: 'gallery',
+              car_id: car.id
+            });
+          }
+          if (instructionNew.imgType === 'description') {
+            await models.GalleryCars.create({
+              img_url: path.join('images/cars', carId, file.originalname),
+              img_type: 'description',
+              car_id: car.id
+            });
+          }
         }
-        });
-
+        
       console.log('ImageGallery saved at:', imgPath);
       }
     }

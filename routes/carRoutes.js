@@ -26,7 +26,7 @@ router.post('/deleteTeam', carController.deleteTeam);
 router.put('/updateTeam', upload.single('file'), carController.updateTeam);
 
 router.get('/getCars', carController.getCars);
-router.post('/addCar',  upload.single('file'), carController.addCar);
+router.post('/addCar',  upload.array('file'), carController.addCar);
 router.post('/deleteCar', carController.deleteCar);
 router.put('/updateCar',  upload.array('file'), carController.updateCar);
 router.post('/getCarById', carController.getCarById);

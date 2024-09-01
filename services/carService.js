@@ -33,8 +33,11 @@ class CarService {
                 }
             ]  
         });
-        if(car.additional_info) {
+        if(car && car.additional_info) {
             car.additional_info = JSON.parse(car.additional_info);
+        }
+        if(car && car.description_info) {
+            car.description_info = JSON.parse(car.description_info);
         }
         
         console.log('car: ', car);

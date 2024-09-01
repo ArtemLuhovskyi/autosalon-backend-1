@@ -28,6 +28,10 @@ Cars.init(
             type: DataTypes.JSON,
             allowNull: true
         },
+        description_info: {
+            type: DataTypes.JSON,
+            allowNull: true
+        },
         createdAt: {
             type: 'TIMESTAMP',
             defaultValue: literal('CURRENT_TIMESTAMP'),
