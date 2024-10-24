@@ -3,6 +3,7 @@ const Cars = require('../db/models/Cars.js');
 const Users = require('../db/models/Users.js');
 const dataCars = require('../data.js');
 const Team = require('../db/models/Team.js');
+const Orders = require('../db/models/Orders.js');
 const carService = require('../services/carService');
 const teamService = require('../services/teamService');
 const models = require('../db/models');
@@ -327,5 +328,35 @@ exports.register = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error registering user' });
+  }
+};
+
+exports.submitOrder = async (req, res) => {
+  const { username, company_name, telephone, email, car, wishes } = req.body;
+  try {
+    
+    const newOrder = await Orders.create({
+      username,
+      company_name,
+      telephone,
+      email,
+      car,
+      wishes,
+    });
+
+    res.status(201).json({ message: 'Order created successfully', order: newOrder });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error creating order' });
+  }
+};
+
+exports.getOrders = async (req, res) => {
+  try {
+    const orders = await Orders.findAll();
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching orders' });
   }
 };
