@@ -4,6 +4,8 @@ const Users = require('../db/models/Users.js');
 const dataCars = require('../data.js');
 const Team = require('../db/models/Team.js');
 const Orders = require('../db/models/Orders.js');
+const Connections = require('../db/models/Connections.js');
+const TestDrives = require('../db/models/TestDrives.js');
 const carService = require('../services/carService');
 const teamService = require('../services/teamService');
 const models = require('../db/models');
@@ -355,6 +357,67 @@ exports.getOrders = async (req, res) => {
   try {
     const orders = await Orders.findAll();
     res.status(200).json(orders);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching orders' });
+  }
+};
+
+exports.submitDrive = async (req, res) => {
+  const { username, company_name, telephone, email, time, car, color ,  transmission, wishes } = req.body;
+  try {
+    
+    const newTestDrive = await TestDrives.create({
+      username,
+      company_name,
+      telephone,
+      email,
+      time,
+      car,
+      color,
+      transmission,
+      wishes,
+    });
+    res.status(201).json({ message: 'TestDrive created successfully', TestDrives: newTestDrive });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error creating order' });
+  }
+};
+
+exports.getDrives = async (req, res) => {
+  try {
+    const drives = await TestDrives.findAll();
+    res.status(200).json(drives);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching orders' });
+  }
+};
+
+exports.submitConnection = async (req, res) => {
+  const { username, company_name, telephone, email, problems, wishes } = req.body;
+  try {
+
+    const newConnection = await Connections.create({
+      username,
+      company_name,
+      telephone,
+      email,
+      problems,
+      wishes,
+    });
+    res.status(201).json({ message: 'Connection created successfully', Connections: newConnection });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error creating order' });
+  }
+};
+
+exports.getConnection = async (req, res) => {
+  try {
+    const connections = await Connections.findAll();
+    res.status(200).json(connections);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error fetching orders' });

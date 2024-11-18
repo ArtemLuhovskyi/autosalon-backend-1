@@ -2,9 +2,9 @@ const { Model, DataTypes, literal } = require("sequelize");
 const SequelizeConnector = require("../connectors/sequelizeConnector");
 const sequelize = SequelizeConnector.getInstance().sequelizeInstance();
 
-class Cars extends Model { }
+class Brand extends Model { }
 
-Cars.init(
+Brand.init(
     {
         id: {
             type: DataTypes.INTEGER.UNSIGNED,
@@ -12,32 +12,8 @@ Cars.init(
             primaryKey: true,
             autoIncrement: true
         },
-        brand_id: {
-            type: DataTypes.INTEGER.UNSIGNED,
-            references: {
-              model: 'brand',
-              key: 'id'
-            },
-            allowNull: false
-          },
-        title: {
+        brand: {
             type: DataTypes.STRING,
-            allowNull: true
-        },
-        description: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        price: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
-        additional_info: {
-            type: DataTypes.JSON,
-            allowNull: true
-        },
-        description_info: {
-            type: DataTypes.JSON,
             allowNull: true
         },
         createdAt: {
@@ -52,18 +28,17 @@ Cars.init(
         },
     },
     {
-        tableName: "cars",
+        tableName: "brand",
         sequelize,
     }
 );
 
-
-Cars.sync()
+Brand.sync()
     .then(() => {
-        console.log('Table cars created successfully');
+        console.log('Table brand created successfully');
     })
     .catch(err => {
         console.error('Error creating table:', err);
     });
 
-module.exports = Cars;
+module.exports = Brand;

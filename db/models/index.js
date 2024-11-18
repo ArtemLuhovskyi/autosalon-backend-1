@@ -1,6 +1,17 @@
 const Cars = require('./Cars');
 const Team = require('./Team');
+const Brand = require('./Brand');
 const GalleryCars = require('./GalleryCars');
+
+Brand.hasMany(Cars, {
+  foreignKey: 'brand_id',
+  as: 'cars'
+});
+
+Cars.belongsTo(Brand, {
+  foreignKey: 'brand_id',
+  as: 'brand'
+});
 
 Cars.hasMany(GalleryCars, {
   foreignKey: 'car_id',
@@ -15,5 +26,6 @@ GalleryCars.belongsTo(Cars, {
 module.exports = {
     Cars,
     Team,
+    Brand,
     GalleryCars
 };

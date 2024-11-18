@@ -37,4 +37,10 @@ router.post('/register', carController.register);
 router.post('/submitOrder', carController.submitOrder)
 router.get('/getOrders', carController.getOrders)
 
+router.post('/submitDrive', carController.submitDrive)
+router.get('/getDrives', carController.getDrives)
+
+router.post('/submitConnection', carController.submitConnection)
+router.get('/getConnection', carController.getConnection)
+
 module.exports = router;
