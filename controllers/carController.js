@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const Cars = require('../db/models/Cars.js');
+const Brand = require('../db/models/Brand.js');
 const Users = require('../db/models/Users.js');
 const dataCars = require('../data.js');
 const Team = require('../db/models/Team.js');
@@ -101,14 +102,14 @@ exports.getCars = async (req, res) => {
 
 exports.addCar = async (req, res) => {
   try {
-    const { title, description, price, blocks, descriptionBlocks } = req.body;
+    const { title, description, price, blocks, descriptionBlocks, brand } = req.body;
     let {instruction} = req.body;
 
     if (instruction) {
       instruction = JSON.parse(instruction);
     }
 
-    const newCarObj = { title, description, price, additional_info: blocks, description_info: descriptionBlocks };
+    const newCarObj = { title, description, price, additional_info: blocks, description_info: descriptionBlocks, brand_id: brand };
     const newCar = await CarsService.createCar(newCarObj);
     const carId = newCar.id.toString();
     
@@ -173,7 +174,7 @@ exports.addCar = async (req, res) => {
 
 exports.updateCar = async (req, res) => {
   try {
-    const { id, title, description, price, blocks, descriptionBlocks } = req.body;
+    const { id, title, description, price, blocks, descriptionBlocks, brand } = req.body;
     let {instruction, deleteImages} = req.body;
     const car = await CarsService.getCarById(id);
 
@@ -194,6 +195,7 @@ exports.updateCar = async (req, res) => {
     const carId = car.id.toString();
     car.title = title;
     car.description = description;
+    car.brand_id = brand;
     car.price = price;
     car.additional_info = blocks;
     car.description_info = descriptionBlocks;
@@ -289,6 +291,88 @@ exports.getCarById = async (req, res) => {
     const car = await CarsService.getCarById(id);
     res.send({ car });
 };
+
+exports.getBrands = async (req, res) => {
+  try {
+    const brands = await Brand.findAll();
+    res.send({ data: brands });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching brands' });
+  }
+};
+
+exports.addBrand = async (req, res) => {
+  try {
+    const { brand } = req.body;
+
+    if (!brand) {
+      return res.status(400).json({ message: 'Brand name is required' });
+    }
+
+    const newBrand = await Brand.create({ brand });
+
+    res.status(201).json({ message: 'Brand added successfully', data: newBrand });
+  } catch (error) {
+    console.error('Error adding brand:', error);
+
+    res.status(500).json({ message: 'Error adding brand' });
+  }
+};
+
+exports.deleteBrand = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).send({ message: 'Brand ID is required' });
+    }
+
+    const deleted = await Brand.destroy({
+      where: { id }
+    });
+
+    if (deleted) {
+      return res.status(200).send({ message: 'Brand deleted successfully' });
+    } else {
+      return res.status(404).send({ message: 'Brand not found' });
+    }
+  } catch (error) {
+    res.status(500).send({ message: 'Error deleting brand', error });
+  }
+};
+
+exports.updateBrand = async (req, res) => {
+  try {
+    const { id, brand } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Brand ID is required' });
+    }
+
+    if (!brand) {
+      return res.status(400).json({ message: 'Brand name is required' });
+    }
+
+    const existingBrand = await Brand.findByPk(id);
+
+    if (!existingBrand) {
+      return res.status(404).json({ message: 'Brand not found' });
+    }
+
+    existingBrand.brand = brand;
+    await existingBrand.save();
+
+    res.status(200).json({
+      message: 'Brand updated successfully',
+      data: existingBrand,
+    });
+  } catch (error) {
+    console.error('Error updating brand:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;

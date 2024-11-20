@@ -31,6 +31,11 @@ router.post('/deleteCar', carController.deleteCar);
 router.put('/updateCar',  upload.array('file'), carController.updateCar);
 router.post('/getCarById', carController.getCarById);
 
+router.get('/getBrands', carController.getBrands);
+router.post('/addBrand', carController.addBrand);
+router.post('/deleteBrand', carController.deleteBrand);
+router.put('/updateBrand', carController.updateBrand);
+
 router.post('/login', carController.login);
 router.post('/register', carController.register);
 

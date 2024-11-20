@@ -1,5 +1,6 @@
 const Cars = require('../db/models/Cars.js');
 const GalleryCars = require('../db/models/GalleryCars.js');
+const Brand = require('../db/models/Brand.js');
 const models = require('../db/models');
 
 class CarService {
@@ -13,7 +14,11 @@ class CarService {
                     model: models.GalleryCars,
                     as: 'images',
 
-                }
+                },
+                {
+                    model: models.Brand,
+                    as: 'brand',
+                  }
             ]
         });
         console.log('cars: ', cars);
@@ -30,7 +35,11 @@ class CarService {
                     model: models.GalleryCars,
                     as: 'images',
 
-                }
+                },
+                {
+                    model: models.Brand,
+                    as: 'brand',
+                  }
             ]  
         });
         if(car && car.additional_info) {
